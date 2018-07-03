@@ -126,6 +126,8 @@ game.addEventListener("click", function(event) {
                     element.unlock();
                     element.status = "normal";
                     element.rotate();
+                } else {
+                    element.lock();
                 }
             })
         }
