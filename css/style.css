@@ -1,0 +1,104 @@
+* {
+    box-sizing: border-box;
+}
+
+main {
+    margin: 0 auto;
+    width: 620px;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #CFD0CF;
+    color: #434344;
+}
+
+.main-heading {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    font-size: 42px;
+    font-family: Arial, sans-serif;
+    line-height: 47px;
+    text-align: center;
+}
+
+.card-container {
+    perspective: 600px;
+    align-self: center;
+    display: grid;
+    grid-template-columns: repeat(4, 130px);
+    grid-template-rows: repeat(3, 130px);
+    grid-gap: 25px;
+}
+
+.card {
+    /*perspective: 600px;*/
+    margin: auto;
+    font-size: 75px;
+    cursor: pointer;
+    line-height: 120px;
+    text-align: center;
+    width: 130px;
+    height: 130px;
+    background: linear-gradient(45deg, #22AB93, #19668D);
+    border-radius: 9px;
+    border: 5px solid white;
+    box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.5);
+    transition: transform .5s linear;
+    position: relative;
+    transform: rotateY(0deg);
+    transform-style: preserve-3d;
+}
+
+.emoji {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    background: white;
+}
+
+.card.equal .emoji {
+    background-color: #5AD66F;
+}
+
+.card.non-equal .emoji {
+    background-color: #F44336;
+}
+
+.emoji-container {
+    display: none;
+}
+
+.back {
+    backface-visibility: hidden;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: linear-gradient(45deg, #22AB93, #19668D);
+    /*background: transparent;*/
+    border-radius: 4px;
+}
+
+.rotated {
+    transform: rotateY(180deg);
+}
+
+.card:nth-of-type(4n+1) {
+    grid-column: 1/2;
+}
+
+.card:nth-of-type(4n+2) {
+    grid-column: 2/3;
+}
+
+.card:nth-of-type(4n+3) {
+    grid-column: 3/4;
+}
+
+.card:nth-of-type(4n+4) {
+    grid-column: 4/5;
+}
