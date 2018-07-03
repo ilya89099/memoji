@@ -2,7 +2,7 @@ var game = document.querySelector(".card-container");
 var cards = Array.from(document.querySelectorAll(".card"));
 var emojis = ["🐶", "🐱", "🐭", "🐹", "🐰", "🐻", "🐶", "🐱", "🐭", "🐹", "🐰", "🐻"];
 var btn = document.querySelector(".btn");
-
+var openedCards = [];
 
 emojis.sort(function(a, b) {
     return Math.random() - 0.5;
@@ -93,36 +93,32 @@ Card.prototype.unlock = function() {
     this.isLocked = false;
 }
 
-
-
 game.addEventListener("click", function(event) {
     if (!event.target.classList.contains("card-container")) {
-        getCardObject(event.target);
-        var openedCards = [];
-        cards.forEach(function(element) {
-            if (element.isRotated && element.status != "equal") {
-                openedCards.push(element);
-            }
-        });
-        if (openedCards.length == 1) {
-            openedCards[0].lock();
+        var card = getCardObject(event.target);
+        console.log(card);
+        if (card.isRotated && openedCards.indexOf(card) == -1 && card.status == "normal") {
+            openedCards.push(card);
+            card.lock();
         }
+        console.log(openedCards);
         if (openedCards.length == 2) {
             if (openedCards[0].value == openedCards[1].value) {
-                openedCards[0].status = "equal";
-                openedCards[0].lock();
-                openedCards[1].status = "equal";
-                openedCards[1].lock();
+                openedCards.forEach(function(element) {
+                    element.lock();
+                    element.status = "equal";
+                })
+                openedCards.splice(0, openedCards.length);
             } else {
-                openedCards[0].status = "non-equal";
-                openedCards[0].lock();
-                openedCards[1].status = "non-equal";
-                openedCards[1].lock();
+                openedCards.forEach(function(element) {
+                    element.lock();
+                    element.status = "non-equal";
+                })
             }
         }
         if (openedCards.length == 3) {
             openedCards.forEach(function(element) {
-                if (element != getCardObject(event.target)) {
+                if (openedCards.indexOf(element) != 2) {
                     element.unlock();
                     element.status = "normal";
                     element.rotate();
@@ -130,6 +126,7 @@ game.addEventListener("click", function(event) {
                     element.lock();
                 }
             })
+            openedCards.splice(0, 2);
         }
     }
 })
