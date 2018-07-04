@@ -1,16 +1,92 @@
-var game = document.querySelector(".card-container");
-var cards = Array.from(document.querySelectorAll(".card"));
-var emojis = ["🐶", "🐱", "🐭", "🐹", "🐰", "🐻", "🐶", "🐱", "🐭", "🐹", "🐰", "🐻"];
-var btn = document.querySelector(".btn");
+var emojis = ["🐶", "🐱", "🐮", "🐵", "🐰", "🐻"];
 var openedCards = [];
-
-emojis.sort(function(a, b) {
-    return Math.random() - 0.5;
-})
-
-cards = cards.map(function(value) {
+var correctCards = [];
+var resetBtn = document.querySelector(".reset");
+var modal = document.querySelector(".cover");
+var cards = Array.from(document.querySelectorAll(".card")).map(function(value) {
     return new Card(value);
+});
+
+resetBtn.addEventListener("click", function() {
+    game.reset();
 })
+emojis = emojis.concat(emojis);
+
+function shuffle() {
+    emojis.sort(function(a, b) {
+        return Math.random() - 0.5;
+    })
+    cards.forEach(function(element, index) {
+        element.value = emojis[index];
+    })
+}
+
+shuffle();
+
+var game = {
+    element: document.querySelector(".card-container"),
+    win: function() {
+        modal.classList.add("win");
+        timer.stop();
+    },
+    lose: function() {
+        modal.classList.add("lose");
+    },
+    reset: function() {
+        modal.classList.remove("win");
+        modal.classList.remove("lose");
+        cards.forEach(function(element) {
+            element.reset();
+        });
+        timer.reset();
+        shuffle();
+        openedCards.splice(0, openedCards.length);
+        correctCards.splice(0, correctCards.length);
+    }
+}
+
+var timer = {
+    element: document.querySelector(".timer"),
+    initialTimeValue: document.querySelector(".timer").innerHTML,
+    intervalIdentifier: null,
+    isStarted: false,
+    reduce: function(interval) {
+        var time = this.element.innerHTML;
+        var minutes = time.slice(0, time.search(/:/));
+        var seconds = time.slice(time.search(/:/) + 1);
+        if (seconds > 0) {
+            if (seconds > 10) {
+                this.element.innerHTML = minutes + ":" + (seconds - 1);
+            } else {
+                this.element.innerHTML = minutes + ":" + "0" + (seconds - 1);
+            }
+
+        } else {
+            this.element.innerHTML = (minutes - 1) + ":59";
+        }
+        if (minutes == 0 && seconds - 1 == 0) {
+            game.lose();
+            this.stop();
+        };
+
+    },
+    start: function() {
+        if (!this.isStarted) {
+            this.isStarted = true;
+            this.intervalIdentifier = setInterval(function() {
+                timer.reduce();
+            }, 1000)
+            console.log(this.intervalIdentifier);
+        }
+    },
+    stop: function() {
+        clearInterval(this.intervalIdentifier);
+        this.isStarted = false;
+    },
+    reset: function() {
+        this.element.innerHTML = this.initialTimeValue;
+    },
+}
 
 function getCardObject(element) {
     if (element.classList.contains("emoji") || element.classList.contains("back")) {
@@ -65,13 +141,9 @@ function Card(element) {
         },
     })
     this.element.addEventListener("click", function(event) {
-        if (thisObj.isLocked) {
-            return;
-        }
-        if (this.classList.contains("rotated")) {
-            this.classList.remove("rotated");
-        } else {
-            this.classList.add("rotated");
+        timer.start();
+        if (!thisObj.isLocked) {
+            thisObj.rotate();
         }
     })
 
@@ -93,22 +165,32 @@ Card.prototype.unlock = function() {
     this.isLocked = false;
 }
 
-game.addEventListener("click", function(event) {
+Card.prototype.reset = function() {
+    this.unlock();
+    this.status = "normal";
+    if (this.isRotated) {
+        this.rotate();
+    }
+}
+
+function gameClickHandler(event) {
     if (!event.target.classList.contains("card-container")) {
         var card = getCardObject(event.target);
-        console.log(card);
         if (card.isRotated && openedCards.indexOf(card) == -1 && card.status == "normal") {
             openedCards.push(card);
             card.lock();
         }
-        console.log(openedCards);
         if (openedCards.length == 2) {
             if (openedCards[0].value == openedCards[1].value) {
                 openedCards.forEach(function(element) {
                     element.lock();
                     element.status = "equal";
+                    correctCards.push(element);
                 })
                 openedCards.splice(0, openedCards.length);
+                if (correctCards.length == 12) {
+                    game.win();
+                }
             } else {
                 openedCards.forEach(function(element) {
                     element.lock();
@@ -119,9 +201,7 @@ game.addEventListener("click", function(event) {
         if (openedCards.length == 3) {
             openedCards.forEach(function(element) {
                 if (openedCards.indexOf(element) != 2) {
-                    element.unlock();
-                    element.status = "normal";
-                    element.rotate();
+                    element.reset();
                 } else {
                     element.lock();
                 }
@@ -129,8 +209,6 @@ game.addEventListener("click", function(event) {
             openedCards.splice(0, 2);
         }
     }
-})
+};
 
-for (i = 0; i < 12; i++) {
-    cards[i].value = emojis[i];
-}
+game.element.addEventListener("click", gameClickHandler);
