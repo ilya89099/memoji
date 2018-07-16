@@ -76,7 +76,7 @@ var timer = {
             this.intervalIdentifier = setInterval(function() {
                 timer.reduce();
             }, 1000)
-            console.log(this.intervalIdentifier);
+
         }
     },
     stop: function() {
@@ -96,8 +96,6 @@ function getCardObject(element) {
 }
 
 function Card(element) {
-    var thisObj = this;
-    this.isLocked = false;
     this.element = element;
     Object.defineProperty(this, "value", {
         get: function() {
@@ -140,33 +138,15 @@ function Card(element) {
             return this.element.classList.contains("rotated");
         },
     })
-    this.element.addEventListener("click", function(event) {
-        timer.start();
-        if (!thisObj.isLocked) {
-            thisObj.rotate();
-        }
-    })
+
 
 }
 
 Card.prototype.rotate = function() {
-    if (this.element.classList.contains("rotated")) {
-        this.element.classList.remove("rotated");
-    } else {
-        this.element.classList.add("rotated");
-    }
-}
-
-Card.prototype.lock = function() {
-    this.isLocked = true;
-}
-
-Card.prototype.unlock = function() {
-    this.isLocked = false;
+    this.element.classList.toggle("rotated");
 }
 
 Card.prototype.reset = function() {
-    this.unlock();
     this.status = "normal";
     if (this.isRotated) {
         this.rotate();
@@ -176,14 +156,14 @@ Card.prototype.reset = function() {
 function gameClickHandler(event) {
     if (!event.target.classList.contains("card-container")) {
         var card = getCardObject(event.target);
-        if (card.isRotated && openedCards.indexOf(card) == -1 && card.status == "normal") {
+        if (!card.isRotated && openedCards.indexOf(card) == -1 && card.status == "normal") {
+            timer.start();
             openedCards.push(card);
-            card.lock();
+            card.rotate();
         }
         if (openedCards.length == 2) {
             if (openedCards[0].value == openedCards[1].value) {
                 openedCards.forEach(function(element) {
-                    element.lock();
                     element.status = "equal";
                     correctCards.push(element);
                 })
@@ -193,7 +173,6 @@ function gameClickHandler(event) {
                 }
             } else {
                 openedCards.forEach(function(element) {
-                    element.lock();
                     element.status = "non-equal";
                 })
             }
@@ -202,8 +181,6 @@ function gameClickHandler(event) {
             openedCards.forEach(function(element) {
                 if (openedCards.indexOf(element) != 2) {
                     element.reset();
-                } else {
-                    element.lock();
                 }
             })
             openedCards.splice(0, 2);
