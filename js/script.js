@@ -1,6 +1,6 @@
 var emojis = ["🐶", "🐱", "🐮", "🐵", "🐰", "🐻"];
 var openedCards = [];
-var correctCards = [];
+var correctPairs = 0;
 var resetBtn = document.querySelector(".reset");
 var modal = document.querySelector(".cover");
 var cards = Array.from(document.querySelectorAll(".card")).map(function(value) {
@@ -41,7 +41,7 @@ var game = {
         timer.reset();
         shuffle();
         openedCards.splice(0, openedCards.length);
-        correctCards.splice(0, correctCards.length);
+        correctPairs = 0;
     }
 }
 
@@ -165,10 +165,10 @@ function gameClickHandler(event) {
             if (openedCards[0].value == openedCards[1].value) {
                 openedCards.forEach(function(element) {
                     element.status = "equal";
-                    correctCards.push(element);
-                })
+                });
+                ++correctPairs;
                 openedCards.splice(0, openedCards.length);
-                if (correctCards.length == 12) {
+                if (correctPairs == (cards.length / 2)) {
                     game.win();
                 }
             } else {
