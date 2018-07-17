@@ -1,4 +1,6 @@
-var emojis = ["🐶", "🐱", "🐮", "🐵", "🐰", "🐻"];
+var emojis = Array.from(document.querySelectorAll(".card")).map(function(element) {
+    return element.querySelector(".emoji").innerHTML;
+});
 var openedCards = [];
 var correctPairs = 0;
 var resetBtn = document.querySelector(".reset");
@@ -10,12 +12,12 @@ var cards = Array.from(document.querySelectorAll(".card")).map(function(value) {
 resetBtn.addEventListener("click", function() {
     game.reset();
 })
-emojis = emojis.concat(emojis);
 
 function shuffle() {
     emojis.sort(function(a, b) {
         return Math.random() - 0.5;
     })
+    console.log(emojis);
     cards.forEach(function(element, index) {
         element.value = emojis[index];
     })
