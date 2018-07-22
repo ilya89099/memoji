@@ -2,15 +2,17 @@ var emojis = Array.from(document.querySelectorAll(".card")).map(function(element
     return element.querySelector(".emoji").innerHTML;
 });
 var openedCards = [];
+var firstClick = true;
 var correctPairs = 0;
 var resetBtn = document.querySelector(".reset");
 var modal = document.querySelector(".cover");
-var cards = Array.from(document.querySelectorAll(".card")).map(function(value) {
+var cards = Array.from(document.querySelectorAll(".card")).map(function(value, index) {
+    value.dataset.index = index;
     return new Card(value);
 });
 
 resetBtn.addEventListener("click", function() {
-    game.reset();
+    reset();
 })
 
 function shuffle() {
@@ -22,7 +24,16 @@ function shuffle() {
     })
 }
 
-shuffle();
+function reset() {
+    game.reset();
+    cards.forEach(function(element) {
+        element.reset();
+    });
+    timer.reset();
+    firstClick = true;
+    openedCards.splice(0, openedCards.length);
+    correctPairs = 0;
+}
 
 var game = {
     element: document.querySelector(".card-container"),
@@ -36,13 +47,6 @@ var game = {
     reset: function() {
         modal.classList.remove("win");
         modal.classList.remove("lose");
-        cards.forEach(function(element) {
-            element.reset();
-        });
-        timer.reset();
-        shuffle();
-        openedCards.splice(0, openedCards.length);
-        correctPairs = 0;
     }
 }
 
@@ -86,10 +90,13 @@ var timer = {
 }
 
 function getCardObject(element) {
-    if (element.classList.contains("emoji") || element.classList.contains("back")) {
-        return cards[element.parentNode.className.match(/\d+/)[0]]
+    while (element != document) {
+        if (element.classList.contains("card")) {
+            return cards[element.dataset.index];
+        }
+        element = element.parentNode;
     }
-    return cards[element.className.match(/\d+/)[0]];
+    return null;
 }
 
 function Card(element) {
@@ -151,8 +158,9 @@ Card.prototype.reset = function() {
 }
 
 function gameClickHandler(event) {
-    if (!event.target.classList.contains("card-container")) {
-        var card = getCardObject(event.target);
+    var card = getCardObject(event.target);
+    if (card != null) {
+        firstClick ? (shuffle(), firstClick = false) : null;
         if (!card.isRotated && openedCards.indexOf(card) == -1 && card.status == "normal") {
             timer.start();
             openedCards.push(card);
