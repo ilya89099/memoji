@@ -17,7 +17,6 @@ function shuffle() {
     emojis.sort(function(a, b) {
         return Math.random() - 0.5;
     })
-    console.log(emojis);
     cards.forEach(function(element, index) {
         element.value = emojis[index];
     })
@@ -56,13 +55,9 @@ var timer = {
         var time = this.element.innerHTML;
         var minutes = time.slice(0, time.search(/:/));
         var seconds = time.slice(time.search(/:/) + 1);
-        if (seconds > 0) {
-            if (seconds > 10) {
-                this.element.innerHTML = minutes + ":" + (seconds - 1);
-            } else {
-                this.element.innerHTML = minutes + ":" + "0" + (seconds - 1);
-            }
 
+        if (seconds > 0) {
+            this.element.innerHTML = minutes + ":" + (seconds > 10 ? "" : "0") + (seconds - 1);
         } else {
             this.element.innerHTML = (minutes - 1) + ":59";
         }
